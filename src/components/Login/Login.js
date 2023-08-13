@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 
 import Card from '../UI/Card/Card';
 import classes from './Login.module.css';
 import Button from '../UI/Button/Button';
+import AuthContext from '../../store/auth-context';
 
 const Login = (props) => {
   const [enteredEmail, setEnteredEmail] = useState('');
@@ -10,21 +11,29 @@ const Login = (props) => {
   const [enteredPassword, setEnteredPassword] = useState('');
   const [passwordIsValid, setPasswordIsValid] = useState();
   const [formIsValid, setFormIsValid] = useState(false);
+  const ctx = useContext(AuthContext);
+
+  useEffect(() => {
+    const validationTimeOut = setTimeout(() => {
+      console.log('check form valid');
+
+      setFormIsValid(
+        enteredEmail.includes('@') && enteredPassword.trim().length > 6
+      );
+    }, 1000);
+
+    return () => {
+      console.log('Clean Up');
+      clearTimeout(validationTimeOut);
+    };
+  }, [enteredEmail, enteredPassword]);
 
   const emailChangeHandler = (event) => {
     setEnteredEmail(event.target.value);
-
-    setFormIsValid(
-      event.target.value.includes('@') && enteredPassword.trim().length > 6
-    );
   };
 
   const passwordChangeHandler = (event) => {
     setEnteredPassword(event.target.value);
-
-    setFormIsValid(
-      event.target.value.trim().length > 6 && enteredEmail.includes('@')
-    );
   };
 
   const validateEmailHandler = () => {
@@ -37,7 +46,7 @@ const Login = (props) => {
 
   const submitHandler = (event) => {
     event.preventDefault();
-    props.onLogin(enteredEmail, enteredPassword);
+    ctx.onLogin(enteredEmail, enteredPassword);
   };
 
   return (
